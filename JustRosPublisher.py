@@ -3,7 +3,7 @@ import random
 import time
 from std_msgs.msg import String, Float32MultiArray
 
-topic = print('Input Topic Name(Default: /B_to_A):')
+topic = input('Input Topic Name(Default: /B_to_A):')
 ros_pub = rospy.Publisher(topic, Float32MultiArray, queue_size=10)
 
 
