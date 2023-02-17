@@ -5,17 +5,16 @@ import struct
 from functools import partial
 
 name_ip_dict = {
-    'A': 'tcp://localhost:5555',
-    'B': 'tcp://192.168.1.101:5555', 
-    'C': 'tcp://192.168.1.102:5555'
+    'A': 'tcp://192.168.43.138:5555',
+    'B': 'tcp://192.168.43.150:5555'
 }
 
-my_name = 'A'
+my_name = 'B'
+print('My IP', name_ip_dict[my_name])
 
 context = zmq.Context()
 poller = zmq.Poller()
 
-# 订阅者套接字
 sub_sockets = {}
 for name, socket in name_ip_dict.items():
     if name == my_name:
@@ -25,8 +24,8 @@ for name, socket in name_ip_dict.items():
     sub_socket.setsockopt_string(zmq.SUBSCRIBE, name + '_to_' + my_name)
     sub_sockets[name] = sub_socket
     poller.register(sub_socket, zmq.POLLIN)
+    print(f'Listen to {name} @ {socket}')
 
-# 发布者套接字
 pub_socket = context.socket(zmq.PUB)
 pub_socket.bind("tcp://*:5555")
     
@@ -34,10 +33,10 @@ pub_socket.bind("tcp://*:5555")
 def float_array_callback(msg, who):
     data = msg.data
     msg = struct.pack('f' * len(data), *data)
+    print(f'Got ROS Message {data}')
     topic = my_name + '_to_' + who
-    pub_socket.send_multipart([topic, msg])
+    pub_socket.send_multipart([topic.encode(), msg])
 
-# ROS订阅者和发布者
 ros_subs = []
 for name, socket in name_ip_dict.items():
     if name == my_name:
@@ -47,6 +46,7 @@ for name, socket in name_ip_dict.items():
         Float32MultiArray, 
         partial(float_array_callback, who=name)
     )
+    print(f'Listen to topic /{my_name}_to_{name}')
     ros_subs.append(ros_sub)
 
 ros_pubs = {}
@@ -54,19 +54,18 @@ for name, socket in name_ip_dict.items():
     if name == my_name:
         continue
     ros_pub = rospy.Publisher('/' + name + '_to_' + my_name, Float32MultiArray, queue_size=10)
+    print(f'Will pub /{name}_to_{my_name}')
     ros_pubs[name] = ros_pub
-
 
 def main_loop():
     while not rospy.is_shutdown():
         socks = dict(poller.poll())
 
-        # 监听订阅者
-        for name, sub_socket in sub_sockets:
+        for name, sub_socket in sub_sockets.items():
             if sub_socket in socks and socks[sub_socket] == zmq.POLLIN:
-                message = sub_socket.recv()
-                rospy.loginfo(f"Received message: {message}")
+                message = sub_socket.recv_multipart()[1]
                 data = struct.unpack('f' * (len(message) // 4), message)
+                rospy.loginfo(f"Received message: {data}")
                 ros_pubs[name].publish(Float32MultiArray(data=data))
 
     context.term()
