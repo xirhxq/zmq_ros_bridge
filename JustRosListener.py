@@ -4,6 +4,7 @@ import time
 from std_msgs.msg import String, Float32MultiArray
 from datetime import datetime
 import socket
+import struct
 
 def now_ms():
     return datetime.now().strftime('%H:%M:%S.%f')[:-3]
@@ -34,24 +35,26 @@ if other_names == []:
     raise AssertionError
 other_name = other_names[0]
 
-from_who_input = input(f'From who(Default: {my_name}): ')
-from_who = my_name if from_who_input == '' else from_who_input
+from_who_input = input(f'From who(Default: {other_name}): ')
+from_who = other_name if from_who_input == '' else from_who_input
 
-to_whom_input = input(f'To whom(Default: {other_name}): ')
-to_whom = other_name if to_whom_input == '' else to_whom_input
+to_whom_input = input(f'To whom(Default: {my_name}): ')
+to_whom = my_name if to_whom_input == '' else to_whom_input
 
 topic = '/' + from_who + '_to_' + to_whom
 print('Topic is ' + topic)
-ros_pub = rospy.Publisher(topic, Float32MultiArray, queue_size=10)
 
-len_input = input('Data length(Default: 2): ')
-len = 2 if len_input == '' else int(len_input)
+def float_array_callback(msg):
+    data = msg.data
+    msg = struct.pack('f' * len(data), *data)
+    print(f'Receive {data} @ {now_ms()}')
 
 
 rospy.init_node('JustRosPublisher', anonymous=True)
 
-while not rospy.is_shutdown():
-    data = [random.randint(1, 10) for _ in range(len)]
-    ros_pub.publish(Float32MultiArray(data=data))
-    print(f'Pub {data} @ {now_ms()}')
-    time.sleep(1)
+rospy.Subscriber(
+    topic,  
+    Float32MultiArray, 
+    float_array_callback
+)
+rospy.spin()
