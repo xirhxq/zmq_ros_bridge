@@ -15,6 +15,6 @@ while True:
     topic = b'A_to_B'
 
     socket.send_multipart([topic, message])
-    print(f"Send Message {message} @ {datetime.now().strftime('%H:%M:%S.%f')[:-3]}")
+    print(f"Send Message {data} @ {datetime.now().strftime('%H:%M:%S.%f')[:-3]}")
 
     time.sleep(3)
