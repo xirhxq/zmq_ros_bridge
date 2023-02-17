@@ -5,8 +5,8 @@ import struct
 from functools import partial
 
 name_ip_dict = {
-    'A': 'tcp://192.168.43.138:5555',
-    'B': 'tcp://192.168.43.150:5555'
+    'A': 'tcp://192.168.43.142:5555',
+    'B': 'tcp://192.168.43.6:5555'
 }
 
 my_name = 'B'
