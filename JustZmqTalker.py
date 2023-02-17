@@ -12,7 +12,7 @@ socket.bind("tcp://*:5555")
 while True:
     data = [random.uniform(0, 1) for _ in range(3)]
     message = struct.pack('f' * len(data), *data)
-    topic = 'A_to_B'
+    topic = b'A_to_B'
 
     socket.send_multipart([topic, message])
     print(f"Send Message {message} @ {datetime.now().strftime('%H:%M:%S.%f')[:-3]}")
