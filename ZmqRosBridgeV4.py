@@ -63,7 +63,7 @@ ros_sub = rospy.Subscriber(
 print(f'Listen to ROS topic /tx on {my_name}\'s ROS network')
 
 
-ros_pub = rospy.Publisher('/' + name + '_to_' + my_name, Float32MultiArray, queue_size=10)
+ros_pub = rospy.Publisher('/rx', Float32MultiArray, queue_size=10)
 print(f'Will pub /rx on {my_name}\'s ROS network')
 
 def main_loop():
