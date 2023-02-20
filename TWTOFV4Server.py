@@ -49,15 +49,18 @@ poll_data = []
 def sub_callback(msg):
     if msg.layout.dim[0].label == other_name:
         tbpoll = time.time()
-        poll_data = msg.data
+        poll_data = list(msg.data)
+        # print(f'Get poll {poll_data} from {other_name}')
         treply = random.uniform(0.5, 1.5)
         poll_data.append(treply)
         time.sleep(treply)
-        send_message_to(other_name)
+        # print(f'After {treply}, send back response to {other_name}')
+        send_message_to(other_name, poll_data)
 
 rx_sub = rospy.Subscriber('/rx', Float32MultiArray, sub_callback)
 
 test_res = []
 
-while not rospy.is_shutdown():
-    print('Start Server...')
+
+print('Start Server...')
+rospy.spin()
