@@ -37,23 +37,21 @@ from_who = my_name if from_who_input == '' else from_who_input
 to_whom_input = input(f'Server Name(Default: {other_name}): ')
 to_whom = other_name if to_whom_input == '' else to_whom_input
 
-rospy.init_node('TWTOFV4Client', anonymous=True)
+rospy.init_node('TWTOFV3Client', anonymous=True)
 
-tx_pub = rospy.Publisher('/tx', Float32MultiArray, queue_size=10)
+tx_pub = rospy.Publisher('/' + my_name + '_to_' + other_name, Float32MultiArray, queue_size=10)
 
 def send_message_to(whom, data):
     msg = Float32MultiArray(data=data)
-    msg.layout.dim.append(MultiArrayDimension(label=whom))
     tx_pub.publish(msg)
 
 resp_data = []
 def sub_callback(msg):
     # print(f'Get {msg.data} from {msg.layout.dim[0].label}')
     global resp_data
-    if msg.layout.dim[0].label == other_name:
-        resp_data = list(msg.data)
+    resp_data = list(msg.data)
 
-rx_sub = rospy.Subscriber('/rx', Float32MultiArray, sub_callback)
+rx_sub = rospy.Subscriber('/' + other_name + '_to_' + my_name, Float32MultiArray, sub_callback)
 
 
 def test_once():
