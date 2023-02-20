@@ -77,7 +77,7 @@ def main_loop():
                 print(f'TCP->ROS | {name} to {my_name}(me) | {now_ms()} | {data}')
                 msg = Float32MultiArray(data=data)
                 msg.layout.dim.append(MultiArrayDimension(label=name))
-                ros_pub.publish(Float32MultiArray(data=data))
+                ros_pub.publish(msg)
 
     context.term()
 
