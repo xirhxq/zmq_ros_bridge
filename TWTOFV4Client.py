@@ -78,20 +78,30 @@ def test_once():
     return (tround - treply) / 2
 
 
-test_res = []
+class MY_STAT:
+    def __init__(self):
+        self.data = []
+    
+    def add_data(self, new_data):
+        self.data.append(new_data)
+        print(f'Test #{len(self.data)} tprop={new_data * 1000:.3f}ms')
+    
+    def show_res(self):
+        print(f'------- {my_name} @ {my_ip} test statistics -------')
+        print('tprop min/avg/max/stdv = {:.3f}/{:.3f}/{:.3f}/{:.3f} ms'.format(
+            min(self.data) * 1000, statistics.mean(self.data) * 1000,
+            max(self.data) * 1000, statistics.stdev(self.data) * 1000))
 
-while not rospy.is_shutdown():
-    operation = input('Continue to test? (y/n): ')
-    if operation == '' or operation == 'y':
-        num_input = input('Input test number (Default: 10): ')
-        num = 10 if num_input == '' else int(num_input)
-        res_ls = []
-        for _ in range(num): 
-            res = test_once()
-            if res > 0:
-                test_res.append(res)
-                res_ls.append(res)
-                print(f'New Result {res}')
-        print(f'Test Result: avg[{statistics.mean(res_ls)}] | std var[{statistics.stdev(res_ls)}] | median[{statistics.median(res_ls)}]')
-    else:
-        print(f'TWTOF Result: avg[{statistics.mean(test_res)}] | std var[{statistics.stdev(test_res)}] | median[{statistics.median(test_res)}]')
+print(f'Test Client {my_name} @ {my_ip}')
+server_ip = name_ip_dict[other_name].split('/')[-1].split(':')[0]
+print(f'Test Server {other_name} @ {server_ip}')
+time.sleep(1)
+
+my_stat = MY_STAT()
+num_input = input('Input test number (Default: 10): ')
+num = 10 if num_input == '' else int(num_input)
+for _ in range(num):
+    res = test_once()
+    if res > 0:
+        my_stat.add_data(res)
+my_stat.show_res()
