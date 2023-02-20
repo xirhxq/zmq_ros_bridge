@@ -46,15 +46,15 @@ def send_message_to(whom, data):
 
 poll_data = []
 def sub_callback(msg):
-    poll_data = msg.data
+    poll_data = list(msg.data)
     treply = random.uniform(0.5, 1.5)
     poll_data.append(treply)
     time.sleep(treply)
-    send_message_to(other_name)
+    send_message_to(other_name, poll_data)
 
 rx_sub = rospy.Subscriber('/' + other_name + '_to_' + my_name, Float32MultiArray, sub_callback)
 
 test_res = []
 
-while not rospy.is_shutdown():
-    print('Start Server...')
+print('Start Server...')
+rospy.spin()
